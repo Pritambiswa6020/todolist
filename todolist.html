@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal To-Do List</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1f2a38; 
+            color: #fff; 
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #34495e; 
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #e67e22; 
+        }
+
+        .input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        input, select, button, textarea {
+            margin-bottom: 10px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #2c3e50; 
+            border-radius: 4px;
+            color: #2c3e50; 
+            background-color: #fff; 
+        }
+
+        button {
+            padding: 10px;
+            background-color: #e67e22; 
+            color: #fff; 
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #d35400; 
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            background-color: #3498db; 
+            padding: 10px;
+            border-radius: 4px;
+            color: #fff; 
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pritams' To-Do List</h1>
+        <div class="input-container">
+            <input type="text" id="taskInput" placeholder="Add a new task">
+            <select id="categoryInput">
+                <option value="">Select Category</option>
+                <option value="personal">Personal</option>
+                <option value="work">Work</option>
+                <option value="study">Study</option>
+                
+            </select>
+            <input type="datetime-local" id="deadlineInput" placeholder="Add a deadline (Optional)">
+            <button onclick="addTask()">Add</button>
+        </div>
+        <div>
+            <label for="filterCategory">Filter by Category:</label>
+            <select id="filterCategory" onchange="filterTasks()">
+                <option value="">All</option>
+                <option value="personal">Personal</option>
+                <option value="work">Work</option>
+                <option value="study">Study</option>
+                
+            </select>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadTasks();
+        });
+
+        function addTask() {
+            var taskInput = document.getElementById("taskInput");
+            var categoryInput = document.getElementById("categoryInput");
+            var deadlineInput = document.getElementById("deadlineInput");
+            var taskList = document.getElementById("taskList");
+
+            if (taskInput.value.trim() !== "") {
+                var newTask = document.createElement("li");
+                newTask.innerHTML = `
+                    <span>${taskInput.value}</span>
+                    <span>Category: ${categoryInput.value}</span>
+                    <span>Deadline: ${deadlineInput.value || "Not set"}</span>
+                    <input type="checkbox" onchange="toggleCompletion(this)">
+                    <button onclick="editTask(this)">Edit</button>
+                    <button onclick="deleteTask(this)">Delete</button>
+                `;
+
+                taskList.appendChild(newTask);
+                saveTasks();
+                clearInputFields();
+            }
+        }
+
+        function toggleCompletion(checkbox) {
+            var taskItem = checkbox.parentNode;
+            taskItem.classList.toggle("completed", checkbox.checked);
+            saveTasks();
+        }
+
+        function editTask(button) {
+            var taskItem = button.parentNode;
+            var taskText = taskItem.getElementsByTagName("span")[0].innerText;
+            var newTaskText = prompt("Edit task:", taskText);
+
+            if (newTaskText !== null && newTaskText !== "") {
+                taskItem.getElementsByTagName("span")[0].innerText = newTaskText;
+                saveTasks();
+            }
+        }
+
+        function deleteTask(button) {
+            var taskItem = button.parentNode;
+            taskItem.remove();
+            saveTasks();
+        }
+
+        function filterTasks() {
+            var filterCategory = document.getElementById("filterCategory").value;
+            var taskItems = document.getElementById("taskList").children;
+
+            for (var i = 0; i < taskItems.length; i++) {
+                var categorySpan = taskItems[i].getElementsByTagName("span")[1];
+
+                if (filterCategory === "" || categorySpan.innerText.includes(filterCategory)) {
+                    taskItems[i].style.display = "flex";
+                } else {
+                    taskItems[i].style.display = "none";
+                }
+            }
+        }
+
+        function clearInputFields() {
+            document.getElementById("taskInput").value = "";
+            document.getElementById("categoryInput").value = "";
+            document.getElementById("deadlineInput").value = "";
+        }
+
+        function saveTasks() {
+            var taskList = document.getElementById("taskList").innerHTML;
+            localStorage.setItem("tasks", taskList);
+        }
+
+        function loadTasks() {
+            var savedTasks = localStorage.getItem("tasks");
+            var taskList = document.getElementById("taskList");
+
+            if (savedTasks) {
+                taskList.innerHTML = savedTasks;
+            }
+        }
+    </script>
+</body>
+</html>
